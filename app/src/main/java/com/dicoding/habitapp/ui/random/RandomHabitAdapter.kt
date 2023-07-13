@@ -3,6 +3,9 @@ package com.dicoding.habitapp.ui.random
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.dicoding.habitapp.R
 import com.dicoding.habitapp.data.Habit
@@ -40,8 +43,31 @@ class RandomHabitAdapter(
         RecyclerView.ViewHolder(itemView) {
         //TODO 14 : Create view and bind data to item view
 
-        fun bind(pageType: PageType, pageData: Habit) {
+        private val tvTitle : TextView = itemView.findViewById(R.id.pager_tv_title)
+        private val tvStartTime : TextView = itemView.findViewById(R.id.pager_tv_start_time)
+        private val tvMinutes : TextView = itemView.findViewById(R.id.pager_tv_minutes)
+        private val ivPriority : ImageView = itemView.findViewById(R.id.pager_priority_level)
+        private val btnStartCountdown : Button = itemView.findViewById(R.id.btn_open_count_down)
 
+        fun bind(pageType: PageType, pageData: Habit) {
+            tvTitle.text = pageData.title
+            tvStartTime.text = pageData.startTime
+            tvMinutes.text = pageData.minutesFocus.toString()
+            btnStartCountdown.setOnClickListener {
+                onClick(pageData)
+            }
+
+            when (pageType) {
+                PageType.LOW -> {
+                    ivPriority.setImageResource(R.drawable.ic_priority_low)
+                }
+                PageType.MEDIUM -> {
+                    ivPriority.setImageResource(R.drawable.ic_priority_medium)
+                }
+                PageType.HIGH -> {
+                    ivPriority.setImageResource(R.drawable.ic_priority_high)
+                }
+            }
         }
     }
 }

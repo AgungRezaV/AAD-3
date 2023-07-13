@@ -6,13 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.dicoding.habitapp.R
+import com.dicoding.habitapp.utils.HABIT
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.util.concurrent.Executors
 
 //TODO 3 : Define room database class and prepopulate database using JSON
 @Database(entities = [Habit::class], version = 1)
@@ -30,18 +33,21 @@ abstract class HabitDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     HabitDatabase::class.java,
-                    "habit.db",
-                ).fallbackToDestructiveMigration().addCallback(object : Callback(){
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        INSTANCE?.let { database ->
-                            Executors.newSingleThreadScheduledExecutor().execute {
-                                fillWithStartingData(context.applicationContext, database.habitDao())
-                            }
-                        }
-                    }
-                }).build()
+                    HABIT
+                ).addCallback(StartingHabit(context))
+                    .allowMainThreadQueries()
+                    .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        class StartingHabit(private val context: Context) : Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                CoroutineScope(Dispatchers.IO).launch {
+                    fillWithStartingData(context, getInstance(context).habitDao())
+                }
             }
         }
 

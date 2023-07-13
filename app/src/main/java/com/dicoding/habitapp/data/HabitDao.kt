@@ -16,7 +16,7 @@ interface HabitDao {
     @RawQuery(observedEntities = [Habit::class])
     fun getHabits(query: SupportSQLiteQuery): DataSource.Factory<Int, Habit>
 
-    @Query("SELECT * FROM `habit` WHERE id = :habitId")
+    @Query("SELECT * FROM `habits` WHERE id = :habitId")
     fun getHabitById(habitId: Int): LiveData<Habit>
 
     @Insert
@@ -28,6 +28,6 @@ interface HabitDao {
     @Delete
     fun deleteHabit(habits: Habit)
 
-    @Query("SELECT * FROM `habit` WHERE priorityLevel = :level")
+    @Query("SELECT * FROM `habits` WHERE priorityLevel = :level")
     fun getRandomHabitByPriorityLevel(level: String): LiveData<Habit>
 }

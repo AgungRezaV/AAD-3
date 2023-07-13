@@ -9,9 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.paging.PagedList
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dicoding.habitapp.R
 import com.dicoding.habitapp.data.Habit
@@ -30,6 +29,7 @@ class HabitListActivity : AppCompatActivity() {
 
     private lateinit var recycler: RecyclerView
     private lateinit var viewModel: HabitListViewModel
+    private lateinit var myAdapter: HabitAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +49,9 @@ class HabitListActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, factory).get(HabitListViewModel::class.java)
 
         //TODO 7 : Submit pagedList to adapter and add intent to detail
-        viewModel.habits.observe(this, Observer(this::showRecyclerView))
+        viewModel.habits.observe(this) {
+            myAdapter.submitList(it)
+        }
 
         //TODO 15
         viewModel.snackbarText.observe(this, Observer(this::showSnackBar))
@@ -109,11 +111,16 @@ class HabitListActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView(){
-        recycler = findViewById(R.id.rv_habit)
-        recycler.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(applicationContext)
+        myAdapter = HabitAdapter {
+            Intent(this, DetailHabitActivity::class.java).apply {
+                putExtra(HABIT_ID, it.id)
+                startActivity(this)
+            }
         }
+        recycler = findViewById(R.id.rv_habit)
+        recycler.layoutManager = GridLayoutManager(this, 2)
+
+        recycler.adapter = myAdapter
     }
 
     private fun initAction() {
@@ -140,15 +147,5 @@ class HabitListActivity : AppCompatActivity() {
 
         })
         itemTouchHelper.attachToRecyclerView(recycler)
-    }
-
-    private fun showRecyclerView(habits : PagedList<Habit>){
-        val habitAdapter = HabitAdapter { habit ->
-            val detailIntent = Intent(this@HabitListActivity, DetailHabitActivity::class.java)
-            detailIntent.putExtra(HABIT_ID, habit.id)
-            startActivity(detailIntent)
-        }
-        habitAdapter.submitList(habits)
-        recycler.adapter = habitAdapter
     }
 }
